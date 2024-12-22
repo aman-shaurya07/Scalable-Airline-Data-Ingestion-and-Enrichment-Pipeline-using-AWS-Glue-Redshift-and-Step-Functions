@@ -1,0 +1,32 @@
+{
+    "Comment": "Airline Data Ingestion Workflow",
+    "StartAt": "Run Glue Crawler",
+    "States": {
+      "Run Glue Crawler": {
+        "Type": "Task",
+        "Resource": "arn:aws:states:::glue:startCrawler",
+        "Parameters": {
+          "Name": "flight-crawler"
+        },
+        "Next": "Run ETL Job"
+      },
+      "Run ETL Job": {
+        "Type": "Task",
+        "Resource": "arn:aws:states:::glue:startJobRun.sync",
+        "Parameters": {
+          "JobName": "transform-flight-data"
+        },
+        "Next": "Success Notification"
+      },
+      "Success Notification": {
+        "Type": "Task",
+        "Resource": "arn:aws:states:::sns:publish",
+        "Parameters": {
+          "TopicArn": "arn:aws:sns:us-east-1:123456789012:flight-data-pipeline-notifications",
+          "Message": "Pipeline executed successfully."
+        },
+        "End": true
+      }
+    }
+  }
+  
